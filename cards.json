@@ -1,0 +1,11 @@
+let cards = [
+    { "title": "Anna", "description": "CEO", "category": "Fashion", "id": "20" },
+    {
+      "title": "Peter",
+      "description": "Spiderman",
+      "category": "Superhero",
+      "id": "30"
+    },
+    { "title": "Laurin", "description": "Nephew", "category": "Family", "id": "uid()" },
+    { "title": "Elina", "description": "Niece", "category": "Family", "id": "uid()" }
+  ];
