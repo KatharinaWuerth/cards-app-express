@@ -10,7 +10,6 @@ function readCards() {
       console.log('There was an error');
     } else {
       cards = JSON.parse(data);
-      console.log('cards', cards);
     }
   });
 }

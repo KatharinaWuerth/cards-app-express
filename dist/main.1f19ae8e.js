@@ -117,9 +117,124 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"main.js":[function(require,module,exports) {
+})({"js/utils.js":[function(require,module,exports) {
+"use strict";
 
-},{}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.get = get;
+exports.getAll = getAll;
+exports.createEl = createEl;
+
+function get(selector) {
+  var target = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : document;
+  return target.querySelector(selector);
+}
+
+function getAll(selector) {
+  var target = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : document;
+  return target.querySelectorAll(selector);
+}
+
+function createEl(_ref) {
+  var _ref$type = _ref.type,
+      type = _ref$type === void 0 ? 'div' : _ref$type,
+      _ref$target = _ref.target,
+      target = _ref$target === void 0 ? document.body : _ref$target,
+      _ref$position = _ref.position,
+      position = _ref$position === void 0 ? 'beforeend' : _ref$position,
+      _ref$innerHTML = _ref.innerHTML,
+      innerHTML = _ref$innerHTML === void 0 ? '' : _ref$innerHTML;
+  var el = document.createElement(type);
+  el.innerHTML = innerHTML;
+  target.insertAdjacentElement(position, el);
+  return el;
+}
+},{}],"js/Card.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Card = void 0;
+
+var _utils = require("./utils");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Card = function Card(target, title, description, category, id) {
+  _classCallCheck(this, Card);
+
+  this.el = (0, _utils.createEl)({
+    type: 'div',
+    target: target,
+    position: 'beforeend'
+  });
+  this.title = title;
+  this.description = description;
+  this.category = category;
+  this.id = id;
+  this.el.innerHTML = "<ul><li>".concat(this.title, "</li><li>").concat(this.description, "</li><li>").concat(this.category, "</li><li>").concat(this.id, "</li></ul>");
+};
+
+exports.Card = Card;
+},{"./utils":"js/utils.js"}],"js/Form.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Form = void 0;
+
+var _utils = require("./utils");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Form = function Form(target) {
+  _classCallCheck(this, Form);
+
+  this.el = (0, _utils.createEl)({
+    type: 'form',
+    target: target,
+    position: 'afterbegin'
+  });
+  this.el.innerHTML = "<input type='text' placeholder='title'><input type='text' placeholder='description'><input type='text' placeholder='category'><button>Submit</button>";
+};
+
+exports.Form = Form;
+},{"./utils":"js/utils.js"}],"js/App.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.App = void 0;
+
+var _Card = require("./Card");
+
+var _Form = require("./Form");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var App = function App() {
+  _classCallCheck(this, App);
+
+  var body = document.getElementsByTagName('body')[0];
+  body.innerHTML = '';
+  this.form = new _Form.Form(); //this.cardList = new CardList();
+
+  this.card = new _Card.Card();
+};
+
+exports.App = App;
+},{"./Card":"js/Card.js","./Form":"js/Form.js"}],"main.js":[function(require,module,exports) {
+"use strict";
+
+var _App = require("./js/App");
+
+new _App.App();
+},{"./js/App":"js/App.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -147,7 +262,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54375" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57408" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
