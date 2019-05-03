@@ -1,5 +1,19 @@
 const express = require('express');
 const uid = require('uid');
+const fs = require('fs');
+
+let cards = readCards();
+
+function readCards() {
+  fs.readFile(__dirname + '/cards.json', 'utf8', (err, data) => {
+    if (err) {
+      console.log('There was an error');
+    } else {
+      cards = JSON.parse(data);
+      console.log('cards', cards);
+    }
+  });
+}
 
 const app = express();
 app.use(express.json());
@@ -8,18 +22,6 @@ app.use(express.static('./dist'));
 app.listen(3000, err => {
   err ? console.log(err) : console.log('Server cards ready');
 });
-
-let cards = [
-  { title: 'Anna', description: 'CEO', category: 'Fashion', id: '20' },
-  {
-    title: 'Peter',
-    description: 'Spiderman',
-    category: 'Superhero',
-    id: '30'
-  },
-  { title: 'Laurin', description: 'Nephew', category: 'Family', id: uid() },
-  { title: 'Elina', description: 'Niece', category: 'Family', id: uid() }
-];
 
 app.get('/cards', (req, res) => {
   res.json(cards);
@@ -44,7 +46,8 @@ app.get('/cards/:id', (req, res) => {
 app.post('/cards', (req, res) => {
   let newCard = req.body;
   newCard.id = uid();
-  cards = [...cards, newCard];
+  cards = [...cards, newCard]; //cards.push(newCard);
+  changeCards(cards);
   res.json(newCard);
 });
 
@@ -54,4 +57,13 @@ app.delete('/cards/:id', (req, res) => {
   let index = cardsId.indexOf(id);
   cards = [...cards.slice(0, index), ...cards.slice(index + 1)]; //habe sie oben definiert, deshalb hier kein let davor
   res.json(cards);
+  changeCards(cards);
 });
+
+///die cards.json erwartet ein JSON, deshalb muss ich meinen Array cards mittels JSON.parse(cards) umwandeln
+function changeCards(cards) {
+  fs.writeFile(__dirname + '/cards.json', JSON.stringify(cards), err => {
+    err && console.log('There was an error');
+    console.log('File was written');
+  });
+}
