@@ -2,9 +2,10 @@ const express = require('express');
 const uid = require('uid');
 const fs = require('fs');
 
-let cards = readCards();
+let cards = null;
+readCardsFromFile();
 
-function readCards() {
+function readCardsFromFile() {
   fs.readFile(__dirname + '/cards.json', 'utf8', (err, data) => {
     if (err) {
       console.log('There was an error');
@@ -46,7 +47,7 @@ app.post('/cards', (req, res) => {
   let newCard = req.body;
   newCard.id = uid();
   cards = [...cards, newCard]; //cards.push(newCard);
-  changeCards(cards);
+  saveCardsToFile(cards);
   res.json(newCard);
 });
 
@@ -56,13 +57,16 @@ app.delete('/cards/:id', (req, res) => {
   let index = cardsId.indexOf(id);
   cards = [...cards.slice(0, index), ...cards.slice(index + 1)]; //habe sie oben definiert, deshalb hier kein let davor
   res.json(cards);
-  changeCards(cards);
+  saveCardsToFile(cards);
 });
 
 ///die cards.json erwartet ein JSON, deshalb muss ich meinen Array cards mittels JSON.parse(cards) umwandeln
-function changeCards(cards) {
+function saveCardsToFile(cards) {
   fs.writeFile(__dirname + '/cards.json', JSON.stringify(cards), err => {
-    err && console.log('There was an error');
-    console.log('File was written');
+    if (err) {
+      console.log('There was an error', err); //err gibt mir dann die genaue Fehlermeldung an
+    } else {
+      console.log('File was written');
+    }
   });
 }

@@ -151,6 +151,53 @@ function createEl(_ref) {
   target.insertAdjacentElement(position, el);
   return el;
 }
+},{}],"js/service.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getCards = getCards;
+exports.addNewCard = addNewCard;
+exports.deleteCard = deleteCard;
+
+function getCards() {
+  return fetch('cards') //sinnvoll das http wegzulassen, denn wenn man die Anwendung später mal ins richtige Internet stellt, gibt es localhost ja nicht mehr
+  .then(function (response) {
+    return response.json();
+  }); //    .then(cards => console.log(cards));
+}
+/*
+function showCardById(id) {
+  fetch('cards/30')
+    .then(response => response.json())
+    .then(peter => console.log(peter));
+}
+*/
+
+
+function addNewCard(data) {
+  fetch('cards', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  }).then(function (response) {
+    return response.json();
+  }).then(function (item) {
+    return console.log(item);
+  });
+} // bei fetch kommt die id als Parameter rein, deshalb ergänze ich sie mit +
+
+
+function deleteCard(id) {
+  fetch('cards/' + id, {
+    method: 'DELETE'
+  }).then(function (response) {
+    return console.log('Card deleted', response);
+  });
+}
 },{}],"js/Card.js":[function(require,module,exports) {
 "use strict";
 
@@ -161,25 +208,101 @@ exports.Card = void 0;
 
 var _utils = require("./utils");
 
+var _service = require("./service");
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Card = function Card(target, title, description, category, id) {
-  _classCallCheck(this, Card);
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-  this.el = (0, _utils.createEl)({
-    type: 'div',
-    target: target,
-    position: 'beforeend'
-  });
-  this.title = title;
-  this.description = description;
-  this.category = category;
-  this.id = id;
-  this.el.innerHTML = "<ul><li>".concat(this.title, "</li><li>").concat(this.description, "</li><li>").concat(this.category, "</li><li>").concat(this.id, "</li></ul>");
-};
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Card =
+/*#__PURE__*/
+function () {
+  function Card(target, card) {
+    _classCallCheck(this, Card);
+
+    this.el = (0, _utils.createEl)({
+      type: 'form',
+      //hier eine form als type angeben, denn diese hat die Eigenart, dass sie nach einem Abschicken sich neu läd, und das wollen wir, damit die entfernte Karte auch aus dem View verschwindet
+      target: target,
+      position: 'beforeend'
+    });
+    this.title = card.title;
+    this.description = card.description;
+    this.category = card.category;
+    this.id = card.id;
+    this.el.innerHTML = "<h3>".concat(this.title, "</h3><ul><li>").concat(this.description, "</li><li>").concat(this.category, "</li><li>").concat(this.id, "</li></ul>");
+    this.deleteButton = document.createElement('button');
+    this.deleteButton.innerText = 'Delete';
+    this.el.appendChild(this.deleteButton);
+    this.deleteButton.addEventListener('click', this.onClick.bind(this));
+  }
+
+  _createClass(Card, [{
+    key: "onClick",
+    value: function onClick() {
+      (0, _service.deleteCard)(this.id);
+    }
+  }]);
+
+  return Card;
+}();
 
 exports.Card = Card;
-},{"./utils":"js/utils.js"}],"js/Form.js":[function(require,module,exports) {
+},{"./utils":"js/utils.js","./service":"js/service.js"}],"js/CardList.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.CardList = void 0;
+
+var _utils = require("./utils");
+
+var _service = require("./service");
+
+var _Card = require("./Card");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var CardList =
+/*#__PURE__*/
+function () {
+  function CardList() {
+    var _this = this;
+
+    _classCallCheck(this, CardList);
+
+    this.el = (0, _utils.createEl)({
+      type: 'div',
+      position: 'beforeend'
+    });
+    (0, _service.getCards)().then(function (cards) {
+      return _this.render(cards);
+    }); //then(this.render) -- Funktion render ist nun Parameter vom Promise
+  }
+
+  _createClass(CardList, [{
+    key: "render",
+    value: function render(cards) {
+      var _this2 = this;
+
+      cards.forEach(function (card) {
+        return new _Card.Card(_this2.el, card);
+      });
+    }
+  }]);
+
+  return CardList;
+}();
+
+exports.CardList = CardList;
+},{"./utils":"js/utils.js","./service":"js/service.js","./Card":"js/Card.js"}],"js/Form.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -191,16 +314,55 @@ var _utils = require("./utils");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Form = function Form(target) {
-  _classCallCheck(this, Form);
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-  this.el = (0, _utils.createEl)({
-    type: 'form',
-    target: target,
-    position: 'afterbegin'
-  });
-  this.el.innerHTML = "<input type='text' placeholder='title'><input type='text' placeholder='description'><input type='text' placeholder='category'><button>Submit</button>";
-};
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Form =
+/*#__PURE__*/
+function () {
+  function Form(target, onSubmit) {
+    _classCallCheck(this, Form);
+
+    this.onSubmit = onSubmit;
+    this.el = (0, _utils.createEl)({
+      type: 'form',
+      target: target,
+      position: 'afterbegin'
+    });
+    this.titleInput = this.createInput('title');
+    this.descriptionInput = this.createInput('description');
+    this.categoryInput = this.createInput('category');
+    this.addButton = document.createElement('button');
+    this.addButton.innerText = 'Submit';
+    this.el.appendChild(this.addButton);
+    this.addButton.addEventListener('click', this.onClick.bind(this)); //muss hier this binden, da sonst das this auf den Button bezogen ist und dieser hat kein InputValue --> muss zurück an die Form!
+  }
+
+  _createClass(Form, [{
+    key: "createInput",
+    value: function createInput(placeholder) {
+      var input = document.createElement('input');
+      input.setAttribute('type', 'text');
+      input.setAttribute('placeholder', placeholder);
+      this.el.appendChild(input);
+      return input;
+    }
+  }, {
+    key: "onClick",
+    value: function onClick(event) {
+      //event.preventDefault();
+      var card = {
+        title: this.titleInput.value,
+        description: this.descriptionInput.value,
+        category: this.categoryInput.value
+      };
+      this.onSubmit(card);
+    }
+  }]);
+
+  return Form;
+}();
 
 exports.Form = Form;
 },{"./utils":"js/utils.js"}],"js/App.js":[function(require,module,exports) {
@@ -211,9 +373,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.App = void 0;
 
-var _Card = require("./Card");
+var _CardList = require("./CardList");
 
 var _Form = require("./Form");
+
+var _service = require("./service");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -222,13 +386,13 @@ var App = function App() {
 
   var body = document.getElementsByTagName('body')[0];
   body.innerHTML = '';
-  this.form = new _Form.Form(); //this.cardList = new CardList();
-
-  this.card = new _Card.Card();
+  console.log(_service.addNewCard);
+  this.form = new _Form.Form(document.body, _service.addNewCard);
+  this.cardList = new _CardList.CardList();
 };
 
 exports.App = App;
-},{"./Card":"js/Card.js","./Form":"js/Form.js"}],"main.js":[function(require,module,exports) {
+},{"./CardList":"js/CardList.js","./Form":"js/Form.js","./service":"js/service.js"}],"main.js":[function(require,module,exports) {
 "use strict";
 
 var _App = require("./js/App");
@@ -262,7 +426,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57408" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50752" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
